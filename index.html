@@ -101,8 +101,8 @@
             <label for="customerName">Customer Name:</label>
             <input type="text" id="customerName" value="John Doe">
 
-            <label for="merchantOrderId">Merchant Order ID:</label>
-            <input type="text" id="merchantOrderId" value="ORDER-PAYOMATIX-12345">
+            <label for="merchantRef">Merchant Order ID:</label>
+            <input type="text" id="merchantRef" value="ORDER-PAYOMATIX-12345">
 
             <label for="returnUrl">Return URL (where Payomatix redirects after payment):</label>
             <!-- This should be a URL on YOUR frontend where you handle success/failure.-->
@@ -149,7 +149,7 @@
             const currency = document.getElementById('currency').value;
             const customerEmail = document.getElementById('customerEmail').value;
             const customerName = document.getElementById('customerName').value;
-            const merchantOrderId = document.getElementById('merchantOrderId').value;
+            const merchantRef = document.getElementById('merchantRef').value;
             const returnUrl = document.getElementById('returnUrl').value;
             const notifyUrl = document.getElementById('notifyUrl').value; // Get notifyUrl
             const description = document.getElementById('description').value;
@@ -174,7 +174,7 @@
                         currency,
                         customerEmail,
                         customerName,
-                        merchantOrderId,
+                        merchantRef,
                         returnUrl,
                         notifyUrl, // Pass notifyUrl to backend
                         description,
