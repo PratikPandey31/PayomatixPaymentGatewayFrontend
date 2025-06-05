@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payomatix Direct Payment Demo</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        h1 { text-align: center; color: #1a73e8; margin-bottom: 30px; font-size: 2em; }
+        form { display: flex; flex-direction: column; gap: 15px; }
+        label { margin-bottom: 5px; font-weight: 600; color: #555; }
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        textarea {
+            padding: 12px;
+            border: 1px solid #c4c4c4;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+            outline: none;
+        }
+        button {
+            padding: 15px 25px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background-color: #0d47a1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        #message {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        #message.show { opacity: 1; }
+        .message.success { background-color: #e6ffed; color: #008000; border: 1px solid #b3e6b3; }
+        .message.error { background-color: #ffe6e6; color: #cc0000; border: 1px solid #e6b3b3; }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 25px;
+            }
+            h1 { font-size: 1.8em; }
+            button { font-size: 16px; padding: 12px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Initiate Payomatix Direct Payment</h1>
+
+        <form id="paymentForm">
+            <label for="amount">Amount (e.g., 100.00):</label>
+            <input type="number" id="amount" step="0.01" value="100.00" required>
+
+            <label for="currency">Currency (e.g., INR, USD):</label>
+            <input type="text" id="currency" value="INR" required>
+
+            <label for="customerEmail">Customer Email:</label>
+            <input type="email" id="customerEmail" value="customer@example.com" required>
+
+            <label for="customerName">Customer Name:</label>
+            <input type="text" id="customerName" value="John Doe">
+
+            <label for="merchantOrderId">Merchant Order ID:</label>
+            <input type="text" id="merchantOrderId" value="ORDER-PAYOMATIX-12345">
+
+            <label for="returnUrl">Return URL (where Payomatix redirects after payment):</label>
+            <!-- This should be a URL on YOUR frontend where you handle success/failure.-->
+            <input type="text" id="returnUrl" value="https://helth-pro.vercel.app/" required>
+
+            <label for="notifyUrl">Notify URL (Your webhook endpoint for status updates):</label>
+            <!-- This should be your publicly accessible backend webhook URL.
+                 For local testing, you'd use a tunneling service like ngrok to expose your localhost. -->
+            <input type="text" id="notifyUrl" value="https://payomatixpaymentgateway.onrender.com/payomatix-webhook" required>
+
+            <label for="description">Description (optional):</label>
+            <textarea id="description" rows="3">Demo payment for a product/service.</textarea>
+
+            <!-- Optional address and phone fields as per Payomatix documentation -->
+            <label for="address">Address (optional):</label>
+            <input type="text" id="address" value="123 Example Street">
+            <label for="city">City (optional):</label>
+            <input type="text" id="city" value="Mumbai">
+            <label for="state">State (optional):</label>
+            <input type="text" id="state" value="Maharashtra">
+            <label for="zip">Zip/Postal Code (optional):</label>
+            <input type="text" id="zip" value="400001">
+            <label for="country">Country (ISO 2-letter code, e.g., IN, US, optional):</label>
+            <input type="text" id="country" value="IN">
+            <label for="phone">Phone (optional):</label>
+            <input type="text" id="phone" value="+919234567891">
+
+            <button type="submit">Pay Now with Payomatix</button>
+        </form>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        document.getElementById('paymentForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = 'Initiating payment... Please wait.';
+            messageDiv.className = 'message show'; // Reset class and show
+
+            // Gather form data
+            const amount = parseFloat(document.getElementById('amount').value);
+            const currency = document.getElementById('currency').value;
+            const customerEmail = document.getElementById('customerEmail').value;
+            const customerName = document.getElementById('customerName').value;
+            const merchantOrderId = document.getElementById('merchantOrderId').value;
+            const returnUrl = document.getElementById('returnUrl').value;
+            const notifyUrl = document.getElementById('notifyUrl').value; // Get notifyUrl
+            const description = document.getElementById('description').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const zip = document.getElementById('zip').value;
+            const country = document.getElementById('country').value;
+            const phone = document.getElementById('phone').value;
+
+            try {
+                // IMPORTANT: Ensure this URL matches your backend Express server's address and port
+                const backendUrl = 'https://payomatixpaymentgateway.onrender.com/create-payment-intent';
+
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount,
+                        currency,
+                        customerEmail,
+                        customerName,
+                        merchantOrderId,
+                        returnUrl,
+                        notifyUrl, // Pass notifyUrl to backend
+                        description,
+                        address,
+                        city,
+                        state,
+                        zip,
+                        country,
+                        phone
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.redirectUrl) {
+                    messageDiv.textContent = 'Payment initiated successfully! Redirecting to Payomatix...';
+                    messageDiv.classList.remove('error');
+                    messageDiv.classList.add('success');
+                    // Redirect the user to the Payomatix payment page
+                    window.location.href = data.redirectUrl;
+                } else {
+                    messageDiv.textContent = `Error: ${data.message || 'Unknown error'}. ${data.errors ? 'Details: ' + data.errors.join(', ') : ''} ${data.error ? 'Backend Error: ' + data.error : ''}`;
+                    messageDiv.classList.remove('success');
+                    messageDiv.classList.add('error');
+                    console.error('Backend response error:', data);
+                }
+            } catch (error) {
+                messageDiv.textContent = `Network error: Could not connect to backend. Please ensure the backend server is running.`;
+                messageDiv.classList.remove('success');
+                messageDiv.classList.add('error');
+                console.error('Fetch error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
