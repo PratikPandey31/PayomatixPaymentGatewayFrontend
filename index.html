@@ -73,7 +73,6 @@
         .message.success { background-color: #e6ffed; color: #008000; border: 1px solid #b3e6b3; }
         .message.error { background-color: #ffe6e6; color: #cc0000; border: 1px solid #e6b3b3; }
 
-        /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
                 margin: 20px;
@@ -98,37 +97,14 @@
             <label for="customerEmail">Customer Email:</label>
             <input type="email" id="customerEmail" value="customer@example.com" required>
 
-            <label for="customerName">Customer Name:</label>
-            <input type="text" id="customerName" value="John Doe">
-
             <label for="merchantRef">Merchant Order ID:</label>
             <input type="text" id="merchantRef" value="ORDER-PAYOMATIX-12345">
 
             <label for="returnUrl">Return URL (where Payomatix redirects after payment):</label>
-            <!-- This should be a URL on YOUR frontend where you handle success/failure.-->
             <input type="text" id="returnUrl" value="https://helth-pro.vercel.app/" required>
 
             <label for="notifyUrl">Notify URL (Your webhook endpoint for status updates):</label>
-            <!-- This should be your publicly accessible backend webhook URL.
-                 For local testing, you'd use a tunneling service like ngrok to expose your localhost. -->
             <input type="text" id="notifyUrl" value="https://payomatixpaymentgateway.onrender.com/payomatix-webhook" required>
-
-            <label for="description">Description (optional):</label>
-            <textarea id="description" rows="3">Demo payment for a product/service.</textarea>
-
-            <!-- Optional address and phone fields as per Payomatix documentation -->
-            <label for="address">Address (optional):</label>
-            <input type="text" id="address" value="123 Example Street">
-            <label for="city">City (optional):</label>
-            <input type="text" id="city" value="Mumbai">
-            <label for="state">State (optional):</label>
-            <input type="text" id="state" value="Maharashtra">
-            <label for="zip">Zip/Postal Code (optional):</label>
-            <input type="text" id="zip" value="400001">
-            <label for="country">Country (ISO 2-letter code, e.g., IN, US, optional):</label>
-            <input type="text" id="country" value="IN">
-            <label for="phone">Phone (optional):</label>
-            <input type="text" id="phone" value="+919234567891">
 
             <button type="submit">Pay Now with Payomatix</button>
         </form>
@@ -138,30 +114,20 @@
 
     <script>
         document.getElementById('paymentForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault(); 
 
             const messageDiv = document.getElementById('message');
             messageDiv.textContent = 'Initiating payment... Please wait.';
-            messageDiv.className = 'message show'; // Reset class and show
+            messageDiv.className = 'message show'; 
 
-            // Gather form data
             const amount = parseFloat(document.getElementById('amount').value);
             const currency = document.getElementById('currency').value;
             const customerEmail = document.getElementById('customerEmail').value;
-            const customerName = document.getElementById('customerName').value;
             const merchantRef = document.getElementById('merchantRef').value;
             const returnUrl = document.getElementById('returnUrl').value;
-            const notifyUrl = document.getElementById('notifyUrl').value; // Get notifyUrl
-            const description = document.getElementById('description').value;
-            const address = document.getElementById('address').value;
-            const city = document.getElementById('city').value;
-            const state = document.getElementById('state').value;
-            const zip = document.getElementById('zip').value;
-            const country = document.getElementById('country').value;
-            const phone = document.getElementById('phone').value;
+            const notifyUrl = document.getElementById('notifyUrl').value; 
 
             try {
-                // IMPORTANT: Ensure this URL matches your backend Express server's address and port
                 const backendUrl = 'https://payomatixpaymentgateway.onrender.com/create-payment-intent';
 
                 const response = await fetch(backendUrl, {
@@ -173,17 +139,9 @@
                         amount,
                         currency,
                         customerEmail,
-                        customerName,
                         merchantRef,
                         returnUrl,
-                        notifyUrl, // Pass notifyUrl to backend
-                        description,
-                        address,
-                        city,
-                        state,
-                        zip,
-                        country,
-                        phone
+                        notifyUrl, 
                     })
                 });
 
@@ -193,7 +151,6 @@
                     messageDiv.textContent = 'Payment initiated successfully! Redirecting to Payomatix...';
                     messageDiv.classList.remove('error');
                     messageDiv.classList.add('success');
-                    // Redirect the user to the Payomatix payment page
                     window.location.href = data.redirectUrl;
                 } else {
                     messageDiv.textContent = `Error: ${data.message || 'Unknown error'}. ${data.errors ? 'Details: ' + data.errors.join(', ') : ''} ${data.error ? 'Backend Error: ' + data.error : ''}`;
