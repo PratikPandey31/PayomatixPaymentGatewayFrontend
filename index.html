@@ -11,7 +11,7 @@
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            max-width: 600px;
+            max-width: 500px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -20,8 +20,7 @@
         label { margin-bottom: 5px; font-weight: 600; color: #555; }
         input[type="text"],
         input[type="email"],
-        input[type="number"],
-        textarea {
+        input[type="number"] {
             padding: 12px;
             border: 1px solid #c4c4c4;
             border-radius: 8px;
@@ -32,8 +31,7 @@
         }
         input[type="text"]:focus,
         input[type="email"]:focus,
-        input[type="number"]:focus,
-        textarea:focus {
+        input[type="number"]:focus {
             border-color: #1a73e8;
             box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
             outline: none;
@@ -85,68 +83,43 @@
 </head>
 <body>
     <div class="container">
-        <h1>Initiate Payomatix Direct Payment</h1>
-
+        <h1>Initiate Payomatix Payment</h1>
         <form id="paymentForm">
+            <label for="customerEmail">Customer Email:</label>
+            <input type="email" id="customerEmail" required placeholder="customer@example.com">
+
             <label for="amount">Amount (e.g., 100.00):</label>
-            <input type="number" id="amount" step="0.01" value="100.00" required>
+            <input type="number" id="amount" step="0.01" min="0.01" required placeholder="1.00">
 
             <label for="currency">Currency (e.g., INR, USD):</label>
-            <input type="text" id="currency" value="INR" required>
-
-            <label for="customerEmail">Customer Email:</label>
-            <input type="email" id="customerEmail" value="customer@example.com" required>
-
-            <label for="merchantRef">Merchant Order ID:</label>
-            <input type="text" id="merchantRef" value="ORDER-PAYOMATIX-12345">
-
-            <label for="returnUrl">Return URL (where Payomatix redirects after payment):</label>
-            <input type="text" id="returnUrl" value="https://helth-pro.vercel.app/" required>
-
-            <label for="notifyUrl">Notify URL (Your webhook endpoint for status updates):</label>
-            <input type="text" id="notifyUrl" value="https://payomatixpaymentgateway.onrender.com/payomatix-webhook" required>
-
+            <input type="text" id="currency" maxlength="3" required placeholder="INR">
             <button type="submit">Pay Now with Payomatix</button>
         </form>
-
         <div id="message" class="message"></div>
     </div>
-
     <script>
         document.getElementById('paymentForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); 
-
+            event.preventDefault();
             const messageDiv = document.getElementById('message');
             messageDiv.textContent = 'Initiating payment... Please wait.';
-            messageDiv.className = 'message show'; 
-
+            messageDiv.className = 'message show';
             const amount = parseFloat(document.getElementById('amount').value);
             const currency = document.getElementById('currency').value;
             const customerEmail = document.getElementById('customerEmail').value;
-            const merchantRef = document.getElementById('merchantRef').value;
-            const returnUrl = document.getElementById('returnUrl').value;
-            const notifyUrl = document.getElementById('notifyUrl').value; 
-
+            // Build payload as per backend
+            const payload = {
+                amount,
+                currency,
+                customerEmail
+            };
             try {
                 const backendUrl = 'https://payomatixpaymentgateway.onrender.com/create-payment-intent';
-
                 const response = await fetch(backendUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        amount,
-                        currency,
-                        customerEmail,
-                        merchantRef,
-                        returnUrl,
-                        notifyUrl, 
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-
                 const data = await response.json();
-
                 if (data.success && data.redirectUrl) {
                     messageDiv.textContent = 'Payment initiated successfully! Redirecting to Payomatix...';
                     messageDiv.classList.remove('error');
