@@ -5,7 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Status</title>
     <style>
-        body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap'); /* Import Inter font for better typography */
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box; /* Ensure padding is included in total width/height */
+        }
         .container {
             background-color: #ffffff;
             padding: 40px;
@@ -15,45 +28,90 @@
             width: 100%;
             box-sizing: border-box;
             text-align: center;
+            display: flex; /* Use flexbox for layout control */
+            flex-direction: column; /* Stack children vertically */
+            align-items: center; /* Center items horizontally */
         }
-        h1 { color: #1a73e8; margin-bottom: 25px; font-size: 2.2em; }
-        p { font-size: 1.1em; line-height: 1.6; margin-bottom: 15px; }
+        h1 {
+            color: #1a73e8;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+        }
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
         .status-box {
             padding: 20px;
             border-radius: 8px;
             margin-top: 25px;
             font-weight: bold;
             font-size: 1.2em;
+            width: 100%; /* Ensure status box takes full width of container */
+            box-sizing: border-box;
         }
         .success { color: #008000; background-color: #e6ffed; border: 1px solid #b3e6b3; }
         .error { color: #cc0000; background-color: #ffe6e6; border: 1px solid #e6b3b3; }
         .info { color: #004085; background-color: #cce5ff; border: 1px solid #b8daff; }
-        .highlight { background-color: #f0f8ff; padding: 10px; border-radius: 5px; word-break: break-all; }
-        a {
-            color: #1a73e8;
+        .highlight {
+            background-color: #f0f8ff;
+            padding: 10px;
+            border-radius: 5px;
+            word-break: break-all;
+            text-align: left; /* Align text inside highlight to left */
+            font-family: 'Consolas', 'Monaco', monospace; /* Monospace for code-like params */
+            font-size: 0.9em;
+        }
+        .return-button { /* New style for the attractive button */
+            display: inline-block;
+            margin-top: 0px; /* Adjust margin to place it correctly */
+            margin-bottom: 25px; /* Add some space below the button */
+            padding: 12px 25px;
+            background-color: #4CAF50; /* Green background */
+            color: white; /* White text */
+            text-align: center;
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.3s ease;
-            margin-top: 20px;
-            display: inline-block;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 128, 0, 0.2); /* Subtle shadow */
+            font-size: 1.1em;
         }
-        a:hover { text-decoration: underline; color: #0d47a1; }
+        .return-button:hover {
+            background-color: #45a049; /* Darker green on hover */
+            transform: translateY(-2px); /* Slight lift effect */
+            text-decoration: none; /* Remove underline on hover */
+        }
+        .return-button:active {
+            transform: translateY(0); /* Press down effect */
+            box-shadow: 0 2px 5px rgba(0, 128, 0, 0.3);
+        }
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
+            body { padding: 10px; } /* Reduce overall padding */
             .container {
-                margin: 20px;
-                padding: 25px;
+                margin: 10px;
+                padding: 20px;
             }
-            h1 { font-size: 1.8em; }
-            p { font-size: 1em; }
-            .status-box { font-size: 1em; padding: 15px; }
+            h1 { font-size: 1.8em; margin-bottom: 20px; }
+            p { font-size: 1em; margin-bottom: 10px; }
+            .status-box { font-size: 1em; padding: 15px; margin-top: 20px; }
+            .return-button {
+                padding: 10px 20px;
+                font-size: 1em;
+                margin-bottom: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Payment Status Page</h1>
+
+        <a href="http://localhost:8080/patient-dashboard?tab=health-card" class="return-button">Go back to RI Medicare</a>
+
         <p class="info">This page serves as the `return_url` you configured for Payomatix.</p>
         <p>After a user completes (or abandons) the payment process on Payomatix's hosted page, they are redirected back to this URL. Payomatix typically appends transaction status or details as URL query parameters.</p>
         <p>In a real application, you would parse these URL parameters here to display the final payment outcome to the user (e.g., "Payment Successful", "Payment Failed").</p>
@@ -63,8 +121,6 @@
             <p>Current URL Parameters (from Payomatix redirect):</p>
             <div class="highlight" id="urlParams"></div>
         </div>
-
-        <a href="/">Go back to the Payment Form</a>
     </div>
 
     <script>
@@ -93,5 +149,3 @@
     </script>
 </body>
 </html>
-
-
